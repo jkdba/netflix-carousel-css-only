@@ -1,3 +1,5 @@
+
+
 * {
   margin: 0;
 }
@@ -90,7 +92,8 @@ svg {
 
 .next,
 .previous {
-  display: none;
+  display: flex;
+  visibility: hidden;
   align-items: center;
   z-index: 10;
   position: absolute;
@@ -98,6 +101,7 @@ svg {
   padding: 1rem;
   background: rgb(0 0 0 / 0);
   opacity: 0;
+  transition: opacity 200ms;
 }
 
 .previous {
@@ -112,14 +116,6 @@ svg {
   bottom: 0;
 }
 
-.media-group:first-child :where(.next, .previous) {
-  display: flex;
-}
-
-.media-scroller:hover :where(.next, .previous) {
-  opacity: 1;
-}
-
 :where(.next, .previous):hover {
   background: rgb(0 0 0 / 0.3);
 }
@@ -128,18 +124,35 @@ svg {
   transition: transform 75ms linear;
   transform: scale(1);
 }
+
 :where(.next, .previous):hover > svg {
   transform: scale(1.2);
 }
 
-.media-group:target :where(.next, .previous) {
-  display: flex;
+.media-group:hover :where(.next, .previous) {
+  opacity: 1;
 }
 
-.media-scroller:has(:target:not(:first-child))
-  .media-group:first-of-type
-  .next {
-  display: none;
+/*
+  both of these are to handle for when no target is selected and the transition from
+  no target to target.
+
+  deal with with no target and first child behavior, z-index plays the role of ensuring
+  the adjacent sibiling's .next link lands on top of the first child's .next link so that
+  the sibling's .next link becomes hovered when its switched to via navigation from the first child
+  when no target is specified.
+
+  using opacity and visibility instead of display so a transition can be applied to the opacity of the .next, .previous links
+  creating a smooth transition from the first or last child to the next or previous child which have both links visible.
+*/
+.media-group:not(:target):first-child:hover :where(.next, .previous) {
+  z-index: 0;
+  visibility: visible;
+}
+
+.media-scroller:hover .media-group:target :where(.next, .previous) {
+  z-index: 1;
+  visibility: visible;
 }
 
 /* navigation indicators */
@@ -161,25 +174,11 @@ svg {
   opacity: 0.5;
 }
 
-.media-scroller:has(.media-group:target)
-  .navigation-indicators
-  > *:nth-child(1) {
-  opacity: 0.5;
-}
-
-.navigation-indicators > *:nth-child(1),
-.media-group:nth-child(1):target ~ .navigation-indicators > *:nth-child(1) {
-  opacity: 1;
-}
-
-.media-group:nth-child(2):target ~ .navigation-indicators > *:nth-child(2) {
-  opacity: 1;
-}
-
-.media-group:nth-child(3):target ~ .navigation-indicators > *:nth-child(3) {
-  opacity: 1;
-}
-
+/* similar hack as before to deal with initial state of no target */
+.media-group:not(:target):first-child:hover ~ .navigation-indicators > *:nth-child(1),
+.media-group:nth-child(1):target ~ .navigation-indicators > *:nth-child(1),
+.media-group:nth-child(2):target ~ .navigation-indicators > *:nth-child(2),
+.media-group:nth-child(3):target ~ .navigation-indicators > *:nth-child(3),
 .media-group:nth-child(4):target ~ .navigation-indicators > *:nth-child(4) {
   opacity: 1;
 }
